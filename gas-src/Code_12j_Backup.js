@@ -84,7 +84,10 @@ function _getBackupFolder() {
       // الفولدر المحفوظ لم يعد موجودًا/تم حذفه — نرجع للافتراضي بدل الفشل
     }
   }
-  return FileEngine.getOrCreateFolder("MOO.ERP - نسخ احتياطية");
+  return FileEngine.getOrCreateFolder(
+    "MOO.ERP - نسخ احتياطية",
+    FileEngine.getSpreadsheetContainerFolder(),
+  );
 }
 
 /** _appendBackupHistoryRow — يسجّل صف واحد في شيت BackupHistory */

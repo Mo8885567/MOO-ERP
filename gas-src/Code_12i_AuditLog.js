@@ -62,7 +62,10 @@ function archiveAndTrimAuditLog() {
     // إيجاد أو إنشاء مجلد الأرشيف في Drive
     // [FILE-ENGINE] موحّد الآن عبر FileEngine.getOrCreateFolder بدل تكرار
     // نفس منطق "إيجاد فولدر أو إنشاؤه" في نسخة رابعة.
-    var folder = FileEngine.getOrCreateFolder(AUDIT_LOG_CONFIG.ARCHIVE_FOLDER);
+    var folder = FileEngine.getOrCreateFolder(
+      AUDIT_LOG_CONFIG.ARCHIVE_FOLDER,
+      FileEngine.getSpreadsheetContainerFolder(),
+    );
 
     // اسم ملف الأرشيف: AuditLog_Archive_2026-01.csv
     var stamp = Utilities.formatDate(

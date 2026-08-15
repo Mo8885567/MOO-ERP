@@ -1,5 +1,5 @@
 deploy-all.js run report
-Date: 8/12/2026, 11:05:21 PM
+Date: 8/15/2026, 11:10:04 PM
 ============================================================
 
 
@@ -41,16 +41,6 @@ $ C:\Program Files\nodejs\node.exe D:\X-MAN\MOO_ERP\moo-erp-vercel\scripts\build
   [4] Pushing backend code to Apps Script (clasp push)
 ------------------------------------------------------------
 $ clasp push --force
-[OK] Backend pushed to Apps Script.
+[FAIL] clasp push failed — check the message above.
 
-------------------------------------------------------------
-  [5] Updating the active deployment (clasp deploy -i)
-------------------------------------------------------------
-$ clasp deploy --deploymentId AKfycbxgrlbvU9lJK97EIj7QgryPUzWV7X0JW_bAQZpaKW4ltltLn72_RjxOUzLxvyacvueYgA --description تحديث تجريبي -1 
-[OK] Deployment (AKfycbxgrlbvU9lJK97EIj7QgryPUzWV7X0JW_bAQZpaKW4ltltLn72_RjxOUzLxvyacvueYgA) updated — the URL (GAS_URL) stays the same.
-
-------------------------------------------------------------
-  [6] Pushing the built frontend via Git (will trigger auto-deploy on Vercel)
-------------------------------------------------------------
-
-🎉 All steps completed successfully.
+[FATAL] Stopping — fix this issue before deploying anything.

@@ -93,8 +93,21 @@
       if (!APP.currentUser) return;
       // 0) تبليغ المركزي بآخر ظهور + النسخة المثبتة (fire-and-forget،
       // بدون onError عشان مايضايقش المستخدم لو المركزي مش متاح دلوقتي)
+      //
+      // [ROOT-FIX-2026-08-13] التعليق فوق ده كان قصد المطوّر بس مكنش
+      // فعليًا بيتحقق: _gsr بترجّع onError افتراضي (لو محدّش مرّر واحد)
+      // بيعمل console.error *و* showToast للمستخدم بعد 25 ثانية —
+      // فالنداء ده كان بيظهر كـ"خطأ" مزعج (توست + كونسول) لكل مستخدم
+      // في كل تسجيل دخول لمجرد إن المركزي (Hub) بطيء/غير متاح مؤقتًا،
+      // رغم إن العملية دي ثانوية بالكامل (تقرير استخدام) ومالهاش أي
+      // تأثير على تسجيل الدخول نفسه. تمرير onSuccess/onError فارغين
+      // هنا يخلّي _gsr تستخدمهم بدل الافتراضي، فيبقى فعلاً صامت 100%
+      // زي ما النية الأصلية كانت — النداء لسه بيتبعت للسيرفر بالظبط
+      // زي الأول، بس فشله (لو حصل) مبيوصلش للمستخدم ولا يتسجّل كخطأ.
       _gsr("reportInstalledVersionOnLogin", [_u(), _t()], {
         label: "UM.reportInstalledVersionOnLogin",
+        onSuccess: function () {},
+        onError: function () {},
       });
       // 1) What's New
       _gsr("getWhatsNew", [_u(), _t()], {
@@ -102,6 +115,10 @@
         onSuccess: function (res) {
           if (res.data) _showWhatsNewModal(res.data);
         },
+        // [ROOT-FIX-2026-08-13] نفس مبدأ الفيكسات التانية في checkOnLogin —
+        // نافذة "الجديد" ثانوية بالكامل، فشلها المؤقت ميستاهلش توست خطأ
+        // يقابل المستخدم أول ما يدخل النظام.
+        onError: function () {},
       });
       // 2) البانر العلوي
       _refreshBanner();
@@ -198,6 +215,10 @@
         onSuccess: function (res) {
           _renderBanner(res.data);
         },
+        // [ROOT-FIX-2026-08-13] بانر تنبيهات ثانوي فوق الصفحة — نفس مبدأ
+        // الفيكسات التانية فوق: فشل مؤقت في جلبه (شبكة/سيرفر بطيء) مايستاهلش
+        // يوقف/يزعج المستخدم بتوست خطأ عند كل تسجيل دخول.
+        onError: function () {},
       });
     }
 
@@ -266,6 +287,17 @@
           _feedCache = res.data || [];
           _feedLoaded = true;
           if (typeof updateAlertBadge === "function") updateAlertBadge();
+        },
+        // [ROOT-FIX-2026-08-13] مفيش onError قبل كده = _gsr كانت بتاخد
+        // الافتراضي (console.error + showToast للمستخدم). النداء ده
+        // Polling خلفي صامت بيتكرر تلقائيًا كل 5 دقايق (مش فعل مباشر
+        // من المستخدم) — أي انقطاع شبكة عابر أو بطء مؤقت في السيرفر
+        // كان بيظهر كتوست خطأ يقاطع المستخدم لكل محاولة فاشلة، رغم إن
+        // المحاولة الجاية بعد 5 دقايق هتحل الموضوع لوحدها عادةً. بنسجّل
+        // فقط في الكونسول (زي باقي الـ background pollers في النظام،
+        // قارن بـ Auth.silentRefresh) من غير ما نزعج المستخدم بتوست.
+        onError: function (r) {
+          console.warn("[UM] getNotificationCenterFeed failed (silent):", r && r.message);
         },
       });
     }

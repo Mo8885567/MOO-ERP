@@ -151,10 +151,29 @@ var FileEngine = (function () {
     return parentFolder ? parentFolder.createFolder(name) : DriveApp.createFolder(name);
   }
 
+  // ── فولدر الشيت الحاوي — كل هيكل الفولدرات بيتبني جواه بدل ما يروح على
+  // جذر Drive بتاع اللي شغّل الكود. Cache على مستوى الـ execution لتجنب
+  // نداء Drive أكتر من مرة في نفس الطلب. ───────────────────────────────
+  var _spreadsheetContainerFolder = undefined;
+  function _getSpreadsheetContainerFolder() {
+    if (_spreadsheetContainerFolder !== undefined) return _spreadsheetContainerFolder;
+    try {
+      var ssId = SpreadsheetApp.getActiveSpreadsheet().getId();
+      var parents = DriveApp.getFileById(ssId).getParents();
+      _spreadsheetContainerFolder = parents.hasNext() ? parents.next() : null;
+    } catch (e) {
+      Logger.log("[FileEngine._getSpreadsheetContainerFolder] خطأ: " + e.message);
+      _spreadsheetContainerFolder = null;
+    }
+    return _spreadsheetContainerFolder;
+  }
+
   // ── إنشاء مسار فولدرات متداخل دفعة واحدة، مثال:
-  //    ["مستندات المخازن", "أحمد", "إذن وارد"] ──
+  //    ["مستندات المخازن", "أحمد", "إذن وارد"] ── أول فولدر في المسار
+  // بيتنشئ جوه فولدر الشيت نفسه (مش جذر Drive) لو مقدرناش نوصله بيتنشئ
+  // على الجذر زي الأول (fallback آمن). ──────────────────────────────────
   function getOrCreateFolderPath(pathParts) {
-    var folder = null;
+    var folder = _getSpreadsheetContainerFolder();
     for (var i = 0; i < pathParts.length; i++) {
       folder = getOrCreateFolder(pathParts[i], folder);
     }
@@ -210,6 +229,7 @@ var FileEngine = (function () {
     sanitizeSegment: sanitizeSegment,
     getOrCreateFolder: getOrCreateFolder,
     getOrCreateFolderPath: getOrCreateFolderPath,
+    getSpreadsheetContainerFolder: _getSpreadsheetContainerFolder,
     upload: upload,
     shareFile: shareFile,
     DOCUMENT_MIME_MAP: DOCUMENT_MIME_MAP,

@@ -2612,7 +2612,10 @@ function _uploadPdfToDrive(pdfBlob) {
   // FileEngine.validate (تحقق نوع/حجم) مش منطبق هنا عمدًا — الاستثناء
   // مقصود ومُوثَّق، وليس سهوًا. سطر المشاركة موحّد الآن عبر FileEngine.shareFile
   // بدل تكرار DriveApp.Access.ANYONE_WITH_LINK يدويًا.
-  var folder = FileEngine.getOrCreateFolder("تقارير MOO.ERP");
+  var folder = FileEngine.getOrCreateFolder(
+    "تقارير MOO.ERP",
+    FileEngine.getSpreadsheetContainerFolder(),
+  );
   var file = FileEngine.shareFile(folder.createFile(pdfBlob));
   return file;
 }
